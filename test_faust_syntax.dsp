@@ -1,28 +1,35 @@
-// Simple FAUST reverb example with syntax highlighting test
+// FAUST Syntax Highlighting Test File
 import("stdfaust.lib");
 
-declare name "SimpleReverb";
-declare author "Test Author";
-declare description "A simple reverb effect";
+declare name "SynthTest";
+declare author "Test";
 
-// Control parameters
-wetdry = hslider("Wet/Dry", 0.3, 0, 1, 0.01);
-roomsize = hslider("Room Size", 0.5, 0, 1, 0.01);
-damp = hslider("Damp", 0.5, 0, 1, 0.01);
+// Comments should be gray/green
+/* Block comment test */
 
-// Simple delay-based reverb
-delay1 = de.delay(48000, int(0.030 * ma.SR));
-delay2 = de.delay(48000, int(0.022 * ma.SR)); 
-delay3 = de.delay(48000, int(0.0134 * ma.SR));
+// Numbers should be purple: 440, 0.5, 1.0, 48000
+freq = 440;
+amp = 0.5;
+sampleRate = 48000;
 
-allpass1 = fi.allpass_comb(1024, 0.131 * ma.SR, 0.7);
-allpass2 = fi.allpass_comb(1024, 0.149 * ma.SR, 0.7);
+// Strings should be yellow
+title = "My Synth";
 
-reverb = _ <: delay1, delay2, delay3 :> 
-         + : allpass1 : allpass2 : 
-         fi.lowpass(1, 5000) * roomsize;
+// Keywords should be pink/red: import, declare, process, with, library
+// Functions should be green: sin, cos, fi.lowpass, de.delay
+osc = os.osc(freq);
+filter = fi.lowpass(1, 1000);
+delay = de.delay(48000, 0.1 * ma.SR);
 
-// Main process with wet/dry mix
-process = _ <: _, reverb : ro.interleave(2,2) : 
-          +, + : par(i, 2, *(wetdry)) : 
-          ro.interleave(2,2) : +, +;
+// Operators should be pink: =, +, -, *, /, <:, :>
+mix = osc * amp;
+stereo = mix <: _, _;
+output = stereo :> _;
+
+// Library prefixes should be orange: fi. os. ma. de.
+envelope = en.adsr(0.01, 0.1, 0.8, 0.2);
+noise = no.noise;
+route = ro.interleave(2,2);
+
+// Main process
+process = osc * envelope;

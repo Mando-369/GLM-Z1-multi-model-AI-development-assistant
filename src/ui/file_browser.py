@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import Dict, List, Set, Optional
 import os
 import platform
+import datetime
 
 
 class FileBrowser:
@@ -145,8 +146,10 @@ class FileBrowser:
         # Instructions
         st.info("💡 **Click on any file name to open it in the editor**")
 
+        # Controls row - Folder controls and Sorting controls
+        col1, col2, col3, col4, col5 = st.columns([1.1, 1.1, 1.4, 1.4, 0.8])
+        
         # Folder controls
-        col1, col2, col3 = st.columns(3)
         with col1:
             if st.button("📂 Expand All", key="expand_all_dirs"):
                 self._expand_all_directories(files_data, project_path)
@@ -155,14 +158,31 @@ class FileBrowser:
             if st.button("📁 Collapse All", key="collapse_all_dirs"):
                 self.expanded_dirs.clear()
                 st.rerun()
+        
+        # Sorting controls
         with col3:
-            st.caption(f"📊 {len(self.expanded_dirs)} folders expanded")
+            sort_by = st.selectbox(
+                "📊 Sort by:",
+                ["name", "type", "date", "size"],
+                key="file_sort_method",
+                help="Sort files by different criteria"
+            )
+        with col4:
+            sort_order = st.selectbox(
+                "🔄 Order:",
+                ["asc", "desc"],
+                format_func=lambda x: "↑ A→Z" if x == "asc" else "↓ Z→A",
+                key="file_sort_order",
+                help="Sort order"
+            )
+        with col5:
+            st.caption(f"📊 {len(self.expanded_dirs)} folders open")
 
         st.write("---")
 
         # Render tree structure
         selected_file = self._render_directory_level(
-            files_data, project_path, "", is_root=True
+            files_data, project_path, "", is_root=True, sort_by=sort_by, sort_order=sort_order
         )
 
         return selected_file
@@ -174,8 +194,10 @@ class FileBrowser:
         current_path: str,
         is_root: bool = False,
         indent_level: int = 0,
+        sort_by: str = "name",
+        sort_order: str = "asc",
     ) -> Optional[str]:
-        """Recursively render directory tree level"""
+        """Recursively render directory tree level with sorting"""
         selected_file = None
 
         # Indentation for visual hierarchy
@@ -183,6 +205,10 @@ class FileBrowser:
 
         # Render files in current directory
         files_list = files_data.get("files", [])
+        
+        # Sort files based on criteria
+        files_list = self._sort_files(files_list, sort_by, sort_order)
+        
         for file_info in files_list:
             file_path = file_info["path"]
             file_name = file_info["name"]
@@ -196,20 +222,22 @@ class FileBrowser:
             else:
                 size_str = f"{file_size//(1024*1024)}MB"
 
-            # Create file button
-            col1, col2 = st.columns([4, 1])
+            # Create file button with right-aligned layout and proper indentation
+            col1, col2 = st.columns([3.5, 1])
             with col1:
                 button_key = f"file_{file_path.replace('/', '_').replace('\\', '_').replace('.', '_')}"
+                file_display = f"{indent}{self.get_file_icon(file_name)} {file_name}"
                 if st.button(
-                    f"{indent}{self.get_file_icon(file_name)} {file_name}",
+                    file_display,
                     key=button_key,
-                    help=f"Click to open • {size_str}",
+                    help=f"Click to open • {size_str} • Modified: {file_info.get('modified', 'Unknown')}",
                     use_container_width=True,
                 ):
                     selected_file = file_path
-
             with col2:
-                st.caption(size_str)
+                # File metadata on the right
+                st.markdown(f"<div style='text-align: right; color: #888; font-size: 0.8em; padding-top: 8px;'>{size_str}</div>", 
+                           unsafe_allow_html=True)
 
         # Render subdirectories
         directories = files_data.get("directories", {})
@@ -225,8 +253,8 @@ class FileBrowser:
             # Determine if expanded
             is_expanded = dir_path in self.expanded_dirs
 
-            # Directory header button
-            col1, col2 = st.columns([4, 1])
+            # Directory header button with right-aligned layout and proper indentation
+            col1, col2 = st.columns([3.5, 1])
             with col1:
                 # Toggle expand/collapse
                 expand_icon = "▼" if is_expanded else "▶"
@@ -235,8 +263,9 @@ class FileBrowser:
                 )
 
                 button_key = f"dir_{dir_path.replace('/', '_').replace('\\', '_').replace('.', '_')}"
+                dir_display = f"{indent}{expand_icon} {dir_icon} {dir_name}/"
                 if st.button(
-                    f"{indent}{expand_icon} {dir_icon} {dir_name}/",
+                    dir_display,
                     key=button_key,
                     help=f"Click to {'collapse' if is_expanded else 'expand'} • {file_count} files, {dir_count} folders",
                     use_container_width=True,
@@ -246,19 +275,34 @@ class FileBrowser:
                     else:
                         self.expanded_dirs.add(dir_path)
                     st.rerun()
-
             with col2:
-                st.caption(f"📄{file_count} 📁{dir_count}")
+                st.markdown(f"<div style='text-align: right; color: #888; font-size: 0.8em; padding-top: 8px;'>📄{file_count} 📁{dir_count}</div>", 
+                           unsafe_allow_html=True)
 
             # Render contents if expanded
             if is_expanded:
                 sub_selected = self._render_directory_level(
-                    dir_data, project_path, dir_path, False, indent_level + 1
+                    dir_data, project_path, dir_path, False, indent_level + 1, sort_by, sort_order
                 )
                 if sub_selected:
                     selected_file = sub_selected
 
         return selected_file
+
+    def _sort_files(self, files_list: List[Dict], sort_by: str, sort_order: str) -> List[Dict]:
+        """Sort files based on specified criteria"""
+        reverse = sort_order == "desc"
+        
+        if sort_by == "name":
+            return sorted(files_list, key=lambda f: f["name"].lower(), reverse=reverse)
+        elif sort_by == "type":
+            return sorted(files_list, key=lambda f: (Path(f["name"]).suffix.lower(), f["name"].lower()), reverse=reverse)
+        elif sort_by == "size":
+            return sorted(files_list, key=lambda f: f["size"], reverse=reverse)
+        elif sort_by == "date":
+            return sorted(files_list, key=lambda f: f.get("modified", 0), reverse=reverse)
+        else:
+            return files_list
 
     def _count_directories(self, files_data: Dict) -> int:
         """Count total directories recursively"""

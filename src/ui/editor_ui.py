@@ -51,9 +51,9 @@ class EditorUI:
             ".bash": "sh",
             ".ps1": "powershell",
             ".bat": "batchfile",
-            ".dsp": "faust",  # FAUST files with custom syntax highlighting
-            ".fst": "faust",
-            ".lib": "faust",
+            ".dsp": "c_cpp",  # FAUST files - use C++ as closest syntax (has similar operators)
+            ".fst": "c_cpp", 
+            ".lib": "c_cpp",
             ".txt": "text",
             ".log": "text",
             ".ini": "ini",
@@ -78,150 +78,6 @@ class EditorUI:
             
         return "text"
 
-    def inject_faust_syntax_highlighter(self):
-        """Inject FAUST syntax highlighting into ACE editor"""
-        faust_syntax_js = """
-        <script>
-        // Define FAUST syntax highlighting for ACE editor
-        if (typeof ace !== 'undefined') {
-            ace.define("ace/mode/faust_highlight_rules", ["require", "exports", "module", "ace/lib/oop", "ace/mode/text_highlight_rules"], function(require, exports, module) {
-                "use strict";
-
-                var oop = require("../lib/oop");
-                var TextHighlightRules = require("./text_highlight_rules").TextHighlightRules;
-
-                var FaustHighlightRules = function() {
-                    // FAUST IDE color scheme
-                    this.$rules = {
-                        "start" : [
-                            {
-                                token : "comment.line.double-slash.faust",
-                                regex : "\\/\\/.*$"
-                            },
-                            {
-                                token : "comment.block.faust",
-                                regex : "\\/\\*",
-                                next : "comment"
-                            },
-                            {
-                                token : "string.quoted.double.faust",
-                                regex : '"',
-                                next : "string"
-                            },
-                            {
-                                token : "keyword.control.faust",
-                                regex : "\\b(import|declare|component|library|environment|with|letrec|case|seq|par|sum|prod)\\b"
-                            },
-                            {
-                                token : "keyword.operator.faust",
-                                regex : "\\b(process|declare|import|component|library|environment|with)\\b"
-                            },
-                            {
-                                token : "support.function.faust",
-                                regex : "\\b(sin|cos|tan|asin|acos|atan|atan2|exp|log|log10|pow|sqrt|abs|min|max|fmod|remainder|floor|ceil|rint|round|int|float|button|checkbox|vslider|hslider|nentry|vgroup|hgroup|tgroup|vbargraph|hbargraph|attach|acos|asin|atan|atan2|cos|sin|tan|exp|exp2|exp10|log|log2|log10|pow|sqrt|abs|min|max|fmod|remainder|floor|ceil|rint|rdtable|rwtable|select2|select3)\\b"
-                            },
-                            {
-                                token : "support.class.faust",
-                                regex : "\\b(fi|os|ma|de|re|en|no|si|an|co|ve|wa|sy|ba|ho|sp|ro|pm|dm|aa|pf|rev|compressor|gate|limiter|delay|echo|flanger|phaser|chorus|freeverb|reverb|filter|moog|svf|resonhp|resonlp|resonbp|lowpass|highpass|bandpass|notch|allpass|comb|string|pluck|karplus|excitation|impulse|noise)\\b"
-                            },
-                            {
-                                token : "constant.numeric.faust",
-                                regex : "\\b\\d+(?:\\.\\d+)?(?:[eE][+-]?\\d+)?[fF]?\\b"
-                            },
-                            {
-                                token : "variable.parameter.faust",
-                                regex : "\\b[a-zA-Z_][a-zA-Z0-9_]*(?=\\s*[(])"
-                            },
-                            {
-                                token : "keyword.operator.assignment.faust",
-                                regex : "="
-                            },
-                            {
-                                token : "keyword.operator.arithmetic.faust",
-                                regex : "[+\\-*/%]"
-                            },
-                            {
-                                token : "keyword.operator.comparison.faust",
-                                regex : "[<>]=?|[!=]="
-                            },
-                            {
-                                token : "keyword.operator.logical.faust",
-                                regex : "[&|!]"
-                            },
-                            {
-                                token : "punctuation.definition.parameters.begin.faust",
-                                regex : "[(]"
-                            },
-                            {
-                                token : "punctuation.definition.parameters.end.faust",
-                                regex : "[)]"
-                            },
-                            {
-                                token : "punctuation.separator.faust",
-                                regex : "[,;:]"
-                            },
-                            {
-                                token : "punctuation.definition.block.begin.faust",
-                                regex : "[{]"
-                            },
-                            {
-                                token : "punctuation.definition.block.end.faust",
-                                regex : "[}]"
-                            }
-                        ],
-                        "comment" : [
-                            {
-                                token : "comment.block.faust",
-                                regex : "\\*\\/",
-                                next : "start"
-                            },
-                            {
-                                defaultToken : "comment.block.faust"
-                            }
-                        ],
-                        "string" : [
-                            {
-                                token : "string.quoted.double.faust",
-                                regex : '"',
-                                next : "start"
-                            },
-                            {
-                                defaultToken : "string.quoted.double.faust"
-                            }
-                        ]
-                    };
-                };
-
-                oop.inherits(FaustHighlightRules, TextHighlightRules);
-
-                exports.FaustHighlightRules = FaustHighlightRules;
-            });
-
-            ace.define("ace/mode/faust", ["require", "exports", "module", "ace/lib/oop", "ace/mode/text", "ace/mode/faust_highlight_rules"], function(require, exports, module) {
-                "use strict";
-
-                var oop = require("../lib/oop");
-                var TextMode = require("./text").Mode;
-                var FaustHighlightRules = require("./faust_highlight_rules").FaustHighlightRules;
-
-                var Mode = function() {
-                    this.HighlightRules = FaustHighlightRules;
-                    this.$behaviour = this.$defaultBehaviour;
-                };
-                oop.inherits(Mode, TextMode);
-
-                (function() {
-                    this.lineCommentStart = "//";
-                    this.blockComment = {start: "/*", end: "*/"};
-                    this.$id = "ace/mode/faust";
-                }.call(Mode.prototype));
-
-                exports.Mode = Mode;
-            });
-        }
-        </script>
-        """
-        return faust_syntax_js
 
     def get_editor_theme(self) -> str:
         """Get editor theme based on Streamlit theme"""
@@ -316,46 +172,66 @@ class EditorUI:
 
         st.subheader("📝 Code Editor")
 
-        # Inject FAUST syntax highlighting if needed
-        if file_data.get("language") == "faust":
-            st.markdown(self.inject_faust_syntax_highlighter(), unsafe_allow_html=True)
-            # Add FAUST-specific styling
+        # Add FAUST-specific styling when editing FAUST files
+        if Path(file_path).suffix.lower() in [".dsp", ".fst", ".lib"]:
             st.markdown("""
             <style>
-            /* FAUST IDE-inspired color scheme for ACE editor */
-            .ace_editor.ace-monokai .ace_faust {
-                background: #272822;
+            /* FAUST syntax highlighting - Monaco Editor vs-dark theme inspired */
+            .ace_editor {
+                font-family: 'Consolas', 'Monaco', 'Menlo', 'Ubuntu Mono', monospace !important;
+                background-color: #1e1e1e !important;
             }
-            .ace_editor.ace-monokai .ace_keyword.ace_control.ace_faust {
-                color: #f92672; /* Pink for control keywords like import, declare */
+            /* Comments - green like in Monaco */
+            .ace_editor .ace_comment {
+                color: #6A9955 !important;
+                font-style: italic !important;
             }
-            .ace_editor.ace-monokai .ace_keyword.ace_operator.ace_faust {
-                color: #66d9ef; /* Blue for process, with */
+            /* Strings - reddish/orange like Monaco */
+            .ace_editor .ace_string {
+                color: #CE9178 !important;
             }
-            .ace_editor.ace-monokai .ace_support.ace_function.ace_faust {
-                color: #a6e22e; /* Green for built-in functions */
+            /* Numbers - light green like Monaco */
+            .ace_editor .ace_constant.ace_numeric {
+                color: #B5CEA8 !important;
             }
-            .ace_editor.ace-monokai .ace_support.ace_class.ace_faust {
-                color: #fd971f; /* Orange for library prefixes (fi, os, ma, etc.) */
+            /* Keywords - blue like Monaco (import, declare, process, with, etc.) */
+            .ace_editor .ace_keyword {
+                color: #569CD6 !important;
+                font-weight: bold !important;
             }
-            .ace_editor.ace-monokai .ace_constant.ace_numeric.ace_faust {
-                color: #ae81ff; /* Purple for numbers */
+            /* Identifiers and variables - light gray */
+            .ace_editor .ace_identifier {
+                color: #D4D4D4 !important;
             }
-            .ace_editor.ace-monokai .ace_variable.ace_parameter.ace_faust {
-                color: #f8f8f2; /* Light for variable names */
+            /* Functions - yellow like Monaco */
+            .ace_editor .ace_support.ace_function {
+                color: #DCDCAA !important;
             }
-            .ace_editor.ace-monokai .ace_comment.ace_faust {
-                color: #75715e; /* Gray for comments */
+            /* Function names and method calls */
+            .ace_editor .ace_entity.ace_name.ace_function {
+                color: #DCDCAA !important;
             }
-            .ace_editor.ace-monokai .ace_string.ace_faust {
-                color: #e6db74; /* Yellow for strings */
+            /* Parentheses and brackets */
+            .ace_editor .ace_paren {
+                color: #D4D4D4 !important;
             }
-            .ace_editor.ace-monokai .ace_keyword.ace_operator.ace_arithmetic.ace_faust,
-            .ace_editor.ace-monokai .ace_keyword.ace_operator.ace_assignment.ace_faust {
-                color: #f92672; /* Pink for operators */
+            /* Operators and punctuation - light gray */
+            .ace_editor .ace_punctuation.ace_operator {
+                color: #D4D4D4 !important;
+            }
+            /* Types and classes - light blue/teal */
+            .ace_editor .ace_support.ace_type {
+                color: #4EC9B0 !important;
+            }
+            /* Constants and built-ins */
+            .ace_editor .ace_support.ace_constant {
+                color: #4FC1FF !important;
             }
             </style>
             """, unsafe_allow_html=True)
+            
+            # Add informational note about FAUST highlighting
+            st.info("🎵 **FAUST file detected** - Using Monaco Editor-inspired color scheme with C++ syntax highlighting for optimal FAUST code readability.")
 
         # Store the content in a separate session state key for the editor
         editor_value_key = f"editor_value_{file_hash}"
