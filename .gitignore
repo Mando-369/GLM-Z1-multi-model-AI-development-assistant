@@ -28,6 +28,13 @@ env/
 .venv
 .ENV
 .env
+# Added: Catch nested virtual environments
+**/venv/
+lib/hrm/venv/
+
+# Dynamic Libraries (Added for PyTorch)
+*.dylib
+*.dll
 
 # IDEs
 .vscode/
