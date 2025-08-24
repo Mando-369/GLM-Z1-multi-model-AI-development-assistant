@@ -72,6 +72,10 @@ projects/*/temp/
 *.log
 logs/
 
+# Validation and test reports  
+chromadb_validation_report_*.txt
+test_decomposition_*.json
+
 # Documentation (if auto-generated)
 docs/_build/
 docs/generated/
