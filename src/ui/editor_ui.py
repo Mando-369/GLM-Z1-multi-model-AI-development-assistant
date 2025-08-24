@@ -51,9 +51,9 @@ class EditorUI:
             ".bash": "sh",
             ".ps1": "powershell",
             ".bat": "batchfile",
-            ".dsp": "text",  # FAUST files - no specific mode, use text
-            ".fst": "text",
-            ".lib": "text",
+            ".dsp": "faust",  # FAUST files with custom syntax highlighting
+            ".fst": "faust",
+            ".lib": "faust",
             ".txt": "text",
             ".log": "text",
             ".ini": "ini",
@@ -63,6 +63,165 @@ class EditorUI:
         }
 
         return language_map.get(ext, "text")
+
+    def get_code_language_for_display(self, content: str, file_path: str = None) -> str:
+        """Get appropriate language for st.code() based on content or file extension"""
+        if file_path:
+            ext = Path(file_path).suffix.lower()
+            if ext in [".dsp", ".fst", ".lib"]:
+                return "javascript"  # Use JavaScript highlighting as fallback for FAUST (closest syntax)
+        
+        # Detect FAUST code by keywords
+        faust_keywords = ["import", "declare", "process", "library", "component", "with", "letrec"]
+        if any(keyword in content for keyword in faust_keywords):
+            return "javascript"  # Use JavaScript highlighting as fallback
+            
+        return "text"
+
+    def inject_faust_syntax_highlighter(self):
+        """Inject FAUST syntax highlighting into ACE editor"""
+        faust_syntax_js = """
+        <script>
+        // Define FAUST syntax highlighting for ACE editor
+        if (typeof ace !== 'undefined') {
+            ace.define("ace/mode/faust_highlight_rules", ["require", "exports", "module", "ace/lib/oop", "ace/mode/text_highlight_rules"], function(require, exports, module) {
+                "use strict";
+
+                var oop = require("../lib/oop");
+                var TextHighlightRules = require("./text_highlight_rules").TextHighlightRules;
+
+                var FaustHighlightRules = function() {
+                    // FAUST IDE color scheme
+                    this.$rules = {
+                        "start" : [
+                            {
+                                token : "comment.line.double-slash.faust",
+                                regex : "\\/\\/.*$"
+                            },
+                            {
+                                token : "comment.block.faust",
+                                regex : "\\/\\*",
+                                next : "comment"
+                            },
+                            {
+                                token : "string.quoted.double.faust",
+                                regex : '"',
+                                next : "string"
+                            },
+                            {
+                                token : "keyword.control.faust",
+                                regex : "\\b(import|declare|component|library|environment|with|letrec|case|seq|par|sum|prod)\\b"
+                            },
+                            {
+                                token : "keyword.operator.faust",
+                                regex : "\\b(process|declare|import|component|library|environment|with)\\b"
+                            },
+                            {
+                                token : "support.function.faust",
+                                regex : "\\b(sin|cos|tan|asin|acos|atan|atan2|exp|log|log10|pow|sqrt|abs|min|max|fmod|remainder|floor|ceil|rint|round|int|float|button|checkbox|vslider|hslider|nentry|vgroup|hgroup|tgroup|vbargraph|hbargraph|attach|acos|asin|atan|atan2|cos|sin|tan|exp|exp2|exp10|log|log2|log10|pow|sqrt|abs|min|max|fmod|remainder|floor|ceil|rint|rdtable|rwtable|select2|select3)\\b"
+                            },
+                            {
+                                token : "support.class.faust",
+                                regex : "\\b(fi|os|ma|de|re|en|no|si|an|co|ve|wa|sy|ba|ho|sp|ro|pm|dm|aa|pf|rev|compressor|gate|limiter|delay|echo|flanger|phaser|chorus|freeverb|reverb|filter|moog|svf|resonhp|resonlp|resonbp|lowpass|highpass|bandpass|notch|allpass|comb|string|pluck|karplus|excitation|impulse|noise)\\b"
+                            },
+                            {
+                                token : "constant.numeric.faust",
+                                regex : "\\b\\d+(?:\\.\\d+)?(?:[eE][+-]?\\d+)?[fF]?\\b"
+                            },
+                            {
+                                token : "variable.parameter.faust",
+                                regex : "\\b[a-zA-Z_][a-zA-Z0-9_]*(?=\\s*[(])"
+                            },
+                            {
+                                token : "keyword.operator.assignment.faust",
+                                regex : "="
+                            },
+                            {
+                                token : "keyword.operator.arithmetic.faust",
+                                regex : "[+\\-*/%]"
+                            },
+                            {
+                                token : "keyword.operator.comparison.faust",
+                                regex : "[<>]=?|[!=]="
+                            },
+                            {
+                                token : "keyword.operator.logical.faust",
+                                regex : "[&|!]"
+                            },
+                            {
+                                token : "punctuation.definition.parameters.begin.faust",
+                                regex : "[(]"
+                            },
+                            {
+                                token : "punctuation.definition.parameters.end.faust",
+                                regex : "[)]"
+                            },
+                            {
+                                token : "punctuation.separator.faust",
+                                regex : "[,;:]"
+                            },
+                            {
+                                token : "punctuation.definition.block.begin.faust",
+                                regex : "[{]"
+                            },
+                            {
+                                token : "punctuation.definition.block.end.faust",
+                                regex : "[}]"
+                            }
+                        ],
+                        "comment" : [
+                            {
+                                token : "comment.block.faust",
+                                regex : "\\*\\/",
+                                next : "start"
+                            },
+                            {
+                                defaultToken : "comment.block.faust"
+                            }
+                        ],
+                        "string" : [
+                            {
+                                token : "string.quoted.double.faust",
+                                regex : '"',
+                                next : "start"
+                            },
+                            {
+                                defaultToken : "string.quoted.double.faust"
+                            }
+                        ]
+                    };
+                };
+
+                oop.inherits(FaustHighlightRules, TextHighlightRules);
+
+                exports.FaustHighlightRules = FaustHighlightRules;
+            });
+
+            ace.define("ace/mode/faust", ["require", "exports", "module", "ace/lib/oop", "ace/mode/text", "ace/mode/faust_highlight_rules"], function(require, exports, module) {
+                "use strict";
+
+                var oop = require("../lib/oop");
+                var TextMode = require("./text").Mode;
+                var FaustHighlightRules = require("./faust_highlight_rules").FaustHighlightRules;
+
+                var Mode = function() {
+                    this.HighlightRules = FaustHighlightRules;
+                    this.$behaviour = this.$defaultBehaviour;
+                };
+                oop.inherits(Mode, TextMode);
+
+                (function() {
+                    this.lineCommentStart = "//";
+                    this.blockComment = {start: "/*", end: "*/"};
+                    this.$id = "ace/mode/faust";
+                }.call(Mode.prototype));
+
+                exports.Mode = Mode;
+            });
+        }
+        </script>
+        """
+        return faust_syntax_js
 
     def get_editor_theme(self) -> str:
         """Get editor theme based on Streamlit theme"""
@@ -156,6 +315,47 @@ class EditorUI:
         editor_key = f"ace_{file_hash}_{Path(file_path).stem}"
 
         st.subheader("📝 Code Editor")
+
+        # Inject FAUST syntax highlighting if needed
+        if file_data.get("language") == "faust":
+            st.markdown(self.inject_faust_syntax_highlighter(), unsafe_allow_html=True)
+            # Add FAUST-specific styling
+            st.markdown("""
+            <style>
+            /* FAUST IDE-inspired color scheme for ACE editor */
+            .ace_editor.ace-monokai .ace_faust {
+                background: #272822;
+            }
+            .ace_editor.ace-monokai .ace_keyword.ace_control.ace_faust {
+                color: #f92672; /* Pink for control keywords like import, declare */
+            }
+            .ace_editor.ace-monokai .ace_keyword.ace_operator.ace_faust {
+                color: #66d9ef; /* Blue for process, with */
+            }
+            .ace_editor.ace-monokai .ace_support.ace_function.ace_faust {
+                color: #a6e22e; /* Green for built-in functions */
+            }
+            .ace_editor.ace-monokai .ace_support.ace_class.ace_faust {
+                color: #fd971f; /* Orange for library prefixes (fi, os, ma, etc.) */
+            }
+            .ace_editor.ace-monokai .ace_constant.ace_numeric.ace_faust {
+                color: #ae81ff; /* Purple for numbers */
+            }
+            .ace_editor.ace-monokai .ace_variable.ace_parameter.ace_faust {
+                color: #f8f8f2; /* Light for variable names */
+            }
+            .ace_editor.ace-monokai .ace_comment.ace_faust {
+                color: #75715e; /* Gray for comments */
+            }
+            .ace_editor.ace-monokai .ace_string.ace_faust {
+                color: #e6db74; /* Yellow for strings */
+            }
+            .ace_editor.ace-monokai .ace_keyword.ace_operator.ace_arithmetic.ace_faust,
+            .ace_editor.ace-monokai .ace_keyword.ace_operator.ace_assignment.ace_faust {
+                color: #f92672; /* Pink for operators */
+            }
+            </style>
+            """, unsafe_allow_html=True)
 
         # Store the content in a separate session state key for the editor
         editor_value_key = f"editor_value_{file_hash}"
@@ -382,32 +582,34 @@ Please provide the complete modified file content. Only return the code/content,
         )
 
         if diff_display == "Side by Side":
-            self.render_side_by_side_diff(diff_data)
+            self.render_side_by_side_diff(diff_data, file_path)
         elif diff_display == "Unified Diff":
             self.render_unified_diff(diff_data)
         else:
-            self.render_changed_sections(diff_data)
+            self.render_changed_sections(diff_data, file_path)
 
-    def render_side_by_side_diff(self, diff_data: Dict):
+    def render_side_by_side_diff(self, diff_data: Dict, file_path: str = None):
         """Render side-by-side diff comparison"""
         col1, col2 = st.columns(2)
 
         with col1:
             st.write("**Original**")
             original_text = "\n".join(diff_data["original_lines"])
-            st.code(original_text, language=None)
+            lang = self.get_code_language_for_display(original_text, file_path)
+            st.code(original_text, language=lang)
 
         with col2:
             st.write("**AI Suggested**")
             modified_text = "\n".join(diff_data["modified_lines"])
-            st.code(modified_text, language=None)
+            lang = self.get_code_language_for_display(modified_text, file_path)
+            st.code(modified_text, language=lang)
 
     def render_unified_diff(self, diff_data: Dict):
         """Render unified diff format"""
         unified_diff = "\n".join(diff_data["unified_diff"])
         st.code(unified_diff, language="diff")
 
-    def render_changed_sections(self, diff_data: Dict):
+    def render_changed_sections(self, diff_data: Dict, file_path: str = None):
         """Render only the sections with changes"""
         for i, section in enumerate(diff_data["changed_sections"]):
             st.write(f"**Change {i+1}: {section['operation'].title()}**")
@@ -417,12 +619,16 @@ Please provide the complete modified file content. Only return the code/content,
             with col1:
                 if section["original_lines"]:
                     st.write("*Original:*")
-                    st.code("\n".join(section["original_lines"]), language=None)
+                    original_text = "\n".join(section["original_lines"])
+                    lang = self.get_code_language_for_display(original_text, file_path)
+                    st.code(original_text, language=lang)
 
             with col2:
                 if section["modified_lines"]:
                     st.write("*Modified:*")
-                    st.code("\n".join(section["modified_lines"]), language=None)
+                    modified_text = "\n".join(section["modified_lines"])
+                    lang = self.get_code_language_for_display(modified_text, file_path)
+                    st.code(modified_text, language=lang)
 
             st.write("---")
 

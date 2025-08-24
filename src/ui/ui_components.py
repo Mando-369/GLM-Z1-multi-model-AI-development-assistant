@@ -1,6 +1,27 @@
 import streamlit as st
 from pathlib import Path
 from ..core.prompts import MODEL_INFO, FAUST_QUICK_PROMPTS
+import re
+
+
+def get_code_language_from_content(content: str) -> str:
+    """Detect programming language from code content"""
+    # FAUST detection
+    faust_keywords = ["import", "declare", "process", "library", "component", "with", "letrec", "fi.", "os.", "ma.", "de.", "re.", "en."]
+    if any(keyword in content for keyword in faust_keywords):
+        return "javascript"  # Use JavaScript as fallback for FAUST
+    
+    # Other language detection
+    if "def " in content or "import " in content or "class " in content:
+        return "python"
+    elif "#include" in content or "int main" in content or "std::" in content:
+        return "c_cpp"
+    elif "function" in content and "{" in content:
+        return "javascript"
+    elif "package " in content and "public class" in content:
+        return "java"
+    
+    return None
 
 
 def render_project_management(glm_system):
@@ -818,7 +839,9 @@ def render_recent_conversations(chat_history, selected_model):
             ):
                 # Question section
                 st.markdown("**🙋 Your Question:**")
-                st.code(question, language=None)
+                # Detect language for syntax highlighting
+                question_lang = get_code_language_from_content(question)
+                st.code(question, language=question_lang)
 
                 # Answer section
                 st.markdown(f"**🤖 {selected_model}:**")
@@ -891,7 +914,8 @@ def render_full_chat_history(chat_history, selected_model):
                     with col1:
                         st.write("**Question:**")
                     with col2:
-                        st.code(question, language=None)
+                        question_lang = get_code_language_from_content(question)
+                        st.code(question, language=question_lang)
 
                     col1, col2 = st.columns([1, 3])
                     with col1:

@@ -829,26 +829,69 @@ Reference the knowledge base information when relevant."""
             return error_msg
 
     def check_vectorstore_status(self):
-        """Check if vectorstore has documents"""
+        """Check if vectorstore has documents and get count (excluding test documents)"""
         try:
-            # Try a simple search to see if there are documents
-            test_results = self.vectorstore.similarity_search("test", k=1)
-            doc_count = len(test_results)
+            # Get actual document count from ChromaDB collection, excluding test documents
+            collection = self.vectorstore._collection
+            
+            # Get all documents with metadata to filter out test documents
+            all_docs = collection.get(include=['metadatas'])
+            
+            # Count only non-test documents
+            real_doc_count = 0
+            test_doc_count = 0
+            
+            for meta in all_docs['metadatas']:
+                if meta.get('is_test_data', False):
+                    test_doc_count += 1
+                else:
+                    real_doc_count += 1
+            
+            total_count = real_doc_count + test_doc_count
+            
+            # Status message includes both counts for transparency
+            if real_doc_count > 0:
+                message = f"Knowledge base contains {real_doc_count} documents"
+                if test_doc_count > 0:
+                    message += f" ({test_doc_count} test documents excluded)"
+            else:
+                if test_doc_count > 0:
+                    message = f"No real documents loaded ({test_doc_count} test documents excluded). Upload files or load documentation."
+                else:
+                    message = "No documents in knowledge base. Upload files to improve context."
+            
             return {
-                "status": "✅ Ready" if doc_count > 0 else "⚠️ Empty",
-                "document_count": doc_count,
-                "message": (
-                    f"Knowledge base contains {doc_count} documents"
-                    if doc_count > 0
-                    else "No documents in knowledge base. Upload files to improve context."
-                ),
+                "status": "✅ Ready" if real_doc_count > 0 else "⚠️ Empty",
+                "document_count": real_doc_count,
+                "total_count": total_count,
+                "test_count": test_doc_count,
+                "message": message,
             }
+            
         except Exception as e:
-            return {
-                "status": "❌ Error",
-                "document_count": 0,
-                "message": f"Error accessing knowledge base: {e}",
-            }
+            # Fallback to similarity search method if direct count fails
+            try:
+                test_results = self.vectorstore.similarity_search("test", k=100)  # Higher limit
+                doc_count = len(test_results)
+                return {
+                    "status": "✅ Ready" if doc_count > 0 else "⚠️ Empty",
+                    "document_count": doc_count,
+                    "total_count": doc_count,
+                    "test_count": 0,
+                    "message": (
+                        f"Knowledge base contains {doc_count}+ documents (test filtering unavailable)"
+                        if doc_count > 0
+                        else "No documents in knowledge base. Upload files to improve context."
+                    ),
+                }
+            except Exception as fallback_error:
+                return {
+                    "status": "❌ Error",
+                    "document_count": 0,
+                    "total_count": 0,
+                    "test_count": 0,
+                    "message": f"Error accessing knowledge base: {fallback_error}",
+                }
 
     def check_model_availability(self):
         """Check which models are available"""
