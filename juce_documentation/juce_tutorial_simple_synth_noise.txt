@@ -1,0 +1,290 @@
+Source: https://docs.juce.com/master/tutorial_simple_synth_noise.html
+================================================================================
+
+Tutorials
+Tutorial: Build a white noise generator
+This tutorial introduces simple synthesis and audio output. This is key to developing an understanding of audio application (and plug-in) concepts in JUCE.
+LEVEL:
+Intermediate
+PLATFORMS:
+Windows, macOS, Linux
+CLASSES:
+AudioAppComponent
+,
+AudioSourceChannelInfo
+,
+AudioBuffer
+,
+Random
+Getting started
+Download the demo project for this tutorial here:
+PIP
+|
+ZIP
+. Unzip the project and open the first header file in the Projucer.
+If you need help with this step, see
+Tutorial: Projucer Part 1: Getting started with the Projucer
+.
+This tutorial assumes that you are familiar with the basic principles of digital audio. In particular, you should know how audio signals are represented using sampling. You should also be familiar with the idea of the
+sample rate
+in this context (which you may know as
+sampling rate
+,
+sampling frequency
+, or other similar terms).
+The demo project
+The demo project was created using
+The Projucer
+Audio Application
+template.
+The Audio Application template shown highlighted within The Projucer.
+This is a useful starting point for your own audio applications in JUCE. The demo project synthesises white noise and plays it out of the target device's default audio hardware.
+The Audio Application template
+This tutorial implements only audio output. Audio input and real-time audio processing of audio input data are explored in other tutorials. The Audio Application template is very similar to the GUI Application template, except that:
+The
+MainContentComponent
+class inherits from the
+AudioAppComponent
+class rather than the
+Component
+class.
+The
+juce_audio_utils
+module is added to the project, in addition to the other audio-related modules that are added to projects by default.
+The Audio Application template may be used for simple applications, such as the example provided here. It is also scalable for more complex applications, essentially any application that needs to interact directly with the target device's audio hardware. Creating audio plug-ins with JUCE is explored in other tutorials.
+The audio application lifecycle
+The
+AudioAppComponent
+class is an abstract base class, it has three
+pure virtual
+functions that represent the lifecycle of our audio application that we
+must
+implement in our derived class:
+AudioAppComponent::prepareToPlay()
+: This is called just before audio processing starts.
+AudioAppComponent::releaseResources()
+: This is called when audio processing has finished.
+AudioAppComponent::getNextAudioBlock()
+: This is called each time the audio hardware needs a new block of audio data.
+Of these three, the most important is perhaps
+AudioAppComponent::getNextAudioBlock()
+, since this is where you will either generate or process audio in your JUCE audio application. To understand how this works, we need to know a little about how modern computers generate audio. The audio hardware needs to generate a certain number of samples per channel for each second of audio. The CD-quality sample rate is 44.1kHz, which means there needs to be 44100 samples per second per channel sent to the audio hardware for playback. Rather than being passed to the audio hardware a single sample at a time, the samples are passed in buffers --- or blocks --- containing a certain number of samples. For example, at 44.1kHz and a block size of 441 our
+AudioAppComponent::getNextAudioBlock()
+function would be called 100 times per second.
+The buffer size of 441 samples, above, is used to keep the arithmetic simple for the purposes of explanation. In practice, a buffer size of 441 would be unusual. Hardware buffer sizes would almost certainly be a even number and would tend to be powers-of-two (256, 512, 1024, and so on). It is important that your application is prepared to deal with
+any
+buffer size. For more information on the settings for sample rate and buffer sizes, see
+Tutorial: The AudioDeviceManager class
+.
+Essentially, our
+AudioAppComponent::getNextAudioBlock()
+is servicing the
+audio callback
+of the audio hardware. It is important to note that this function will be called from another thread (the
+audio thread
+in most cases).
+For our JUCE audio application to work correctly, there are two more important functions. This time we need to call them, rather than implement them:
+AudioAppComponent::setAudioChannels()
+: We must call this to register the number of input and output channels we need. Typically, we do this in our constructor. In turn, this function triggers the start of audio processing in our application.
+AudioAppComponent::shutdownAudio()
+: We must call this to shutdown the audio system. Typically, we do this in our destructor.
+Initialising the audio application
+Let's now explore our simple implementation of a noise generator by examining the life cycle of an audio application in more detail. Our constructor needs to set up the size of the
+Component
+object (see
+Tutorial: The main component
+). We also need to initialise at least one audio output:
+MainContentComponent()
+{
+    setSize (800, 600);
+    setAudioChannels (0, 2); // no inputs, two outputs
+}
+As mentioned above, the call to the
+AudioAppComponent::setAudioChannels()
+function triggers the audio system to start up. In particular, it will call the
+prepareToPlay()
+function:
+void prepareToPlay (int samplesPerBlockExpected, double sampleRate) override
+{
+    juce::String message;
+    message << "Preparing to play audio...\n";
+    message << " samplesPerBlockExpected = " << samplesPerBlockExpected << "\n";
+    message << " sampleRate = " << sampleRate;
+    juce::Logger::getCurrentLogger()->writeToLog (message);
+}
+In this case we don't really need to do anything here, but as it is a
+pure virtual
+function we
+must
+implement at least an empty function. Here we log some useful information that we can gain about the audio system on the target device at this point. The
+samplesPerBlockExpected
+argument, as its name suggests, is the size (in samples) of the buffers of audio that we can expect to be asked for each time a buffer of audio is requested in our
+getNextAudioBlock()
+function. This buffer size might vary between callbacks, but it is a good indication. The
+sampleRate
+argument tells us the current sample rate of the hardware. We would need this if we were doing something that is frequency-dependent, such as synthesising tones (see
+Tutorial: Build a sine wave synthesiser
+) or using equalisation. We would also need to know the sample rate if we were using delay effects. We don't need this information to generate noise.
+Generating audio data
+Soon after this call to our
+prepareToPlay()
+function the audio thread will begin requesting blocks of audio via the
+AudioAppComponent::getNextAudioBlock()
+function. This function is passed a single
+bufferToFill
+argument that is an
+AudioSourceChannelInfo
+struct. The
+AudioSourceChannelInfo
+struct contains a multichannel buffer of audio samples. It also contains two integer values that specify which region of this buffer should be processed on this call. In more detail, the
+AudioSourceChannelInfo
+contains the following members:
+AudioSampleBuffer* buffer
+: An AudioSampleBuffer object is a multichannel buffer of audio data that is essentially a multidimensional array of
+float
+values. When our
+getNextAudioBlock()
+function is called, this buffer contains any audio data from the target device's audio input (if we requested audio input). When our
+getNextAudioBlock()
+function returns, we must have filled the relevant section of the buffer with audio that we want to play.
+int startSample
+: This is the sample index within the buffer where our
+getNextAudioBlock()
+function should start reading or writing audio.
+int numSamples
+: This is the number of samples in the buffer that should be read or written.
+Audio data stored as floating point values is very straightforward. Each sample of the audio signal is stored as a value that is nominally in the range ±1.0.
+A full scale ±1.0 sine wave.
+At a peak level of ±1.0 like this the output level will be
+very
+loud. In fact, this is the loudest the audio system will be able to generate without clipping. Typically, we will need to output audio that doesn't exceed this ±1.0 limit (although it is fine for intermediate stages of processing to go beyond this limit, as long as the final output is lower).
+The AudioSampleBuffer class
+While the AudioSampleBuffer class is (at a very basic level) just a multichannel array of
+float
+values, it provides a useful set of functions for dealing with audio data. Many of these functions will be covered in later tutorials, but here we make use of the following functions:
+AudioSampleBuffer::getNumChannels()
+: This returns the number of audio channels stored in the buffer. In this case the value should match the number of output channels we requested in our call to the
+AudioAppComponent::setAudioChannels()
+function earlier. (This value will always be the maximum of the number of input and output channels.)
+AudioSampleBuffer::getWritePointer()
+: This returns a pointer to the buffer of
+float
+values at a specific sample offset.
+For our simple application to generate white noise, we need to fill the requested section of the buffer with random values. To do this we can iterate over the channels in the buffer, find the start sample within the buffer for that channel, and write the desired number of samples to the buffer:
+void getNextAudioBlock (const juce::AudioSourceChannelInfo& bufferToFill) override
+{
+    for (auto channel = 0; channel < bufferToFill.buffer->getNumChannels(); ++channel)
+    {
+        // Get a pointer to the start sample in the buffer for this audio output channel
+        auto* buffer = bufferToFill.buffer->getWritePointer (channel, bufferToFill.startSample);
+        // Fill the required number of samples with noise between -0.125 and +0.125
+        for (auto sample = 0; sample < bufferToFill.numSamples; ++sample)
+            buffer[sample] = random.nextFloat() * 0.25f - 0.125f;
+    }
+}
+Generating white noise using the Random class
+Here we make use of the
+Random
+class in order to generate our random values (see
+Tutorial: The Random class
+). To generate white noise we need to generate uniformly distributed random numbers around zero. Here we generate random values between -0.125 and +0.125 by first calling the
+Random::nextFloat()
+function. This generates values between 0 and 1. Then we multiply the result of this by 0.25 and subtract 0.125. (See
+Tutorial: Control audio levels
+for more information on this process.) Notice that we didn't use the
+Random::getSystemRandom()
+function to get the shared
+system
+Random
+object, as shown in other tutorials (
+Tutorial: The Random class
+). This is because we are calling the
+Random::nextFloat()
+function on the audio thread. We need to create our own
+Random
+object otherwise the values might get corrupted by other threads using that shared
+Random
+object. To achieve this, an instance of the
+Random
+class is added to our
+MainContentComponent
+class:
+private:
+juce::Random random;
+JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainContentComponent)
+};
+Shutting down the audio application
+When our application is closed, our destructor will be called. At this point we should call the
+AudioAppComponent::shutdownAudio()
+function:
+~MainContentComponent() override
+{
+    shutdownAudio();
+}
+Calling the
+AudioAppComponent::shutdownAudio()
+function will, in turn, cause the
+AudioAppComponent::releaseResources()
+function to be called. This is a good place to dispose of resources, if we allocated any during the running of our audio process (for example, if we allocated memory or opened some files). In this case, we didn't need any additional resources and we just log the function call with a simple message:
+void releaseResources() override
+{
+    juce::Logger::getCurrentLogger()->writeToLog ("Releasing audio resources");
+}
+Exercise: Try changing the number of audio outputs. Notice that mono noise sounds subtly different from stereo noise. If you have a multichannel sound card, you may be able to generate more than two channels of noise. You could also try changing the level of the noise generated. For example, to generate noise at a level of 0.1 you would need to multiply the randomly generated values by 0.2 and subtract 0.1.
+Summary
+This tutorial has introduced the
+AudioAppComponent
+class, used by the Audio Application template, in order to generate audio. We have covered the following topics:
+Initialising and shutting down the audio system.
+Writing audio data in response to an audio callback.
+Using the
+AudioSourceChannelInfo
+struct and the AudioSampleBuffer class.
+See also
+Tutorial: The AudioDeviceManager class
+Tutorial: Build a sine wave synthesiser
+Tutorial: Control audio levels using decibels
+Tutorial: Control audio levels
+Tutorial: Build a MIDI synthesiser
+Tutorial: Wavetable synthesis
+Purchase
+Get JUCE
+Discover
+What's New in JUCE
+Features
+Made with JUCE
+Blog
+Learn
+Documentation
+Tutorials
+Resources
+Support
+JUCE Forum
+Newsletter
+About
+Contact Us
+Releases
+JUCE Legal
+JUCE Licensing FAQ
+Events
+Audio Developer Conference
+Visit our Facebook
+Visit our Twitter
+Visit our LinkedIn
+Visit our YouTube channel
+© Raw Material Software Limited
+user-circle
+linkedin
+facebook
+pinterest
+youtube
+rss
+twitter
+instagram
+facebook-blank
+rss-blank
+linkedin-blank
+pinterest
+youtube
+twitter
+instagram

@@ -1,0 +1,45 @@
+# Core Streamlit and UI
+streamlit>=1.28.0
+streamlit-ace>=0.1.1
+
+# Multi-model AI system
+langchain>=0.1.0
+langchain-community>=0.0.20
+langchain-ollama>=0.1.0
+
+# Vector database and embeddings
+chromadb>=0.4.0
+
+# File processing
+pypdf>=3.17.0
+pytesseract>=0.3.10
+pillow>=10.0.0
+
+# Text processing
+python-docx>=0.8.11
+
+# Data handling
+pandas>=2.0.0
+numpy>=1.24.0
+
+# System utilities
+pathlib>=1.0.1
+requests>=2.31.0
+
+# Optional: Enhanced OCR support
+# Uncomment if you want better OCR performance
+easyocr>=1.7.0
+
+# Development and testing (optional)
+# pytest>=7.4.0
+# black>=23.0.0
+# flake8>=6.0.0
+
+# Note: Make sure you have Ollama installed separately
+# Download from: https://ollama.ai/
+# 
+# Required Ollama models:
+# ollama pull JollyLlama/GLM-Z1-32B-0414-Q4_K_M:latest
+# ollama pull codellama:13b
+# ollama pull deepseek-coder:6.7b
+# ollama pull nomic-embed-text

@@ -1,0 +1,25 @@
+Source: https://docs.juce.com/master/group__juce__dsp.html
+================================================================================
+
+Classes for audio buffer manipulation, digital audio processing, filtering, oversampling, fast math functions etc.
+More...
+Topics
+containers
+filter_design
+frequency
+maths
+processors
+widgets
+Detailed Description
+Classes for audio buffer manipulation, digital audio processing, filtering, oversampling, fast math functions etc.
+ID: juce_dsp
+vendor: juce
+version: 8.0.8
+name: JUCE DSP classes
+website:
+http://www.juce.com/juce
+license: AGPLv3/Commercial
+minimumCppStandard: 17
+dependencies: juce_audio_formats
+OSXFrameworks: Accelerate
+iOSFrameworks: Accelerate

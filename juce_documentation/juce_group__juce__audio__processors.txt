@@ -1,0 +1,24 @@
+Source: https://docs.juce.com/master/group__juce__audio__processors.html
+================================================================================
+
+Classes for loading and playing VST, AU, LADSPA, or internally-generated audio processors.
+More...
+Topics
+format
+format_types
+processors
+scanning
+utilities
+Detailed Description
+Classes for loading and playing VST, AU, LADSPA, or internally-generated audio processors.
+ID: juce_audio_processors
+vendor: juce
+version: 8.0.8
+name: JUCE audio processor classes
+website:
+http://www.juce.com/juce
+license: AGPLv3/Commercial
+minimumCppStandard: 17
+dependencies: juce_gui_extra, juce_audio_basics
+OSXFrameworks: CoreAudio CoreMIDI AudioToolbox
+iOSFrameworks: AudioToolbox

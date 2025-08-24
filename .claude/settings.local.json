@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(source:*)",
+      "Bash(pip install:*)",
+      "Bash(python test_chromadb_validation.py:*)",
+      "Bash(python3:*)",
+      "Bash(python:*)"
+    ]
+  },
+  "outputStyle": "default"
+}

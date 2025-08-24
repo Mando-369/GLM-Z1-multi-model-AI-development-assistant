@@ -1,0 +1,23 @@
+Source: https://docs.juce.com/master/group__juce__audio__devices.html
+================================================================================
+
+Classes to play and record from audio and MIDI I/O devices.
+More...
+Topics
+audio_io
+midi_io
+sources
+Detailed Description
+Classes to play and record from audio and MIDI I/O devices.
+ID: juce_audio_devices
+vendor: juce
+version: 8.0.8
+name: JUCE audio and MIDI I/O device classes
+website:
+http://www.juce.com/juce
+license: AGPLv3/Commercial
+minimumCppStandard: 17
+dependencies: juce_audio_basics, juce_events
+OSXFrameworks: CoreAudio CoreMIDI AudioToolbox
+iOSFrameworks: CoreAudio CoreMIDI AudioToolbox AVFoundation
+linuxPackages: alsa

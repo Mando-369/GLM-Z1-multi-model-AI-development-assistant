@@ -1,0 +1,25 @@
+Source: https://docs.juce.com/master/group__juce__gui__extra.html
+================================================================================
+
+Miscellaneous GUI classes for specialised tasks.
+More...
+Topics
+code_editor
+documents
+embedding
+misc
+Detailed Description
+Miscellaneous GUI classes for specialised tasks.
+ID: juce_gui_extra
+vendor: juce
+version: 8.0.8
+name: JUCE extended GUI classes
+website:
+http://www.juce.com/juce
+license: AGPLv3/Commercial
+minimumCppStandard: 17
+dependencies: juce_gui_basics
+OSXFrameworks: WebKit
+iOSFrameworks: WebKit
+WeakiOSFrameworks: UserNotifications
+WeakMacOSFrameworks: UserNotifications

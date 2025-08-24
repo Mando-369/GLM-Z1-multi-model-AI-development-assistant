@@ -1,0 +1,95 @@
+================================================================================
+📋 CHROMADB VALIDATION REPORT
+================================================================================
+
+🎯 OVERALL RESULTS: 25/28 tests passed (89.3%)
+
+📊 CHROMADB CONNECTION:
+----------------------------------------
+  Status: ✅ PASSED
+
+📊 DOMAIN DETECTION:
+----------------------------------------
+  ✅ faust_basic: Success
+     domain: faust_synthesis
+  ✅ faust_advanced: Success
+     domain: faust_synthesis
+  ✅ juce_basic: Success
+     domain: general
+  ✅ juce_advanced: Success
+     domain: juce_integration
+  ✅ multi_domain: Success
+     domain: general
+  ✅ complex_task: Success
+     domain: juce_integration
+  ✅ general: Success
+     domain: juce_integration
+
+📊 FAUST KNOWLEDGE:
+----------------------------------------
+  ❌ os.osc oscillator FAUST: No module named 'prompts'
+  ✅ fi.lowpass filter implementation: Success
+     documents_found: 5
+  ✅ re.freeverb reverb algorithm: Success
+     documents_found: 5
+  ✅ de.delay echo effect: Success
+     documents_found: 5
+
+📊 JUCE KNOWLEDGE:
+----------------------------------------
+  ✅ AudioProcessor JUCE plugin: Success
+     documents_found: 5
+  ✅ AudioProcessorValueTreeState parameters: Success
+     documents_found: 5
+  ✅ Component GUI JUCE: Success
+     documents_found: 5
+  ❌ dsp::IIR::Filter JUCE: No module named 'prompts'
+
+📊 ENHANCED RETRIEVAL:
+----------------------------------------
+  ❌ Create FAUST reverb_faust: No module named 'prompts'
+  ✅ JUCE AudioProcessor setup_juce: Success
+  ✅ Real-time audio optimization_general: Success
+
+📊 MODEL ROUTING:
+----------------------------------------
+  ✅ faust_basic: Success
+     recommended_model: Code Llama (FAUST Specialist)
+     domain: faust_synthesis
+  ✅ faust_advanced: Success
+     recommended_model: Code Llama (FAUST Specialist)
+     domain: faust_synthesis
+  ✅ juce_basic: Success
+     recommended_model: DeepSeek Coder (Fast DSP)
+     domain: general
+  ✅ juce_advanced: Success
+     recommended_model: DeepSeek Coder (Fast DSP)
+     domain: juce_integration
+  ✅ multi_domain: Success
+     recommended_model: Code Llama (FAUST Specialist)
+     domain: general
+  ✅ complex_task: Success
+     recommended_model: DeepSeek Coder (Fast DSP)
+     domain: juce_integration
+  ✅ general: Success
+     recommended_model: DeepSeek Coder (Fast DSP)
+     domain: juce_integration
+
+📊 HRM DECOMPOSITION:
+----------------------------------------
+  ✅ Build a complete FAUST reverb with early reflections and late reverberation: Success
+     complexity_score: 0.6
+     domain: general
+     recommended_model: Code Llama (FAUST Specialist)
+  ✅ Create a JUCE plugin with FAUST processing and parameter automation: Success
+     complexity_score: 0.3
+     domain: faust_synthesis
+     recommended_model: Code Llama (FAUST Specialist)
+
+🔧 RECOMMENDATIONS:
+----------------------------------------
+  - Enhanced retrieval has 1 errors - check vectorstore integration
+
+================================================================================
+Generated at: 2025-08-24 21:42:50
+================================================================================

@@ -1,0 +1,24 @@
+{
+    "mcpServers": {
+        "filesystem": {
+            "command": "npx",
+            "args": [
+                "@claude/mcp-filesystem",
+                "--path",
+                "."
+            ]
+        },
+        "chromadb": {
+            "command": "python",
+            "args": [
+                "mcp_chromadb_server.py"
+            ]
+        },
+        "ollama": {
+            "command": "python",
+            "args": [
+                "mcp_ollama_server.py"
+            ]
+        }
+    }
+}

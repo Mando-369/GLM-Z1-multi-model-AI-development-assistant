@@ -1,0 +1,26 @@
+Source: https://docs.juce.com/master/group__juce__audio__basics.html
+================================================================================
+
+Classes for audio buffer manipulation, midi message handling, synthesis, etc.
+More...
+Topics
+audio_play_head
+buffers
+midi
+mpe
+sources
+synthesisers
+utilities
+Detailed Description
+Classes for audio buffer manipulation, midi message handling, synthesis, etc.
+ID: juce_audio_basics
+vendor: juce
+version: 8.0.8
+name: JUCE audio and MIDI data classes
+website:
+http://www.juce.com/juce
+license: AGPLv3/Commercial
+minimumCppStandard: 17
+dependencies: juce_core
+OSXFrameworks: Accelerate
+iOSFrameworks: Accelerate

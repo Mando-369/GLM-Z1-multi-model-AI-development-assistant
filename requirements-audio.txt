@@ -1,0 +1,32 @@
+# Audio Processing Dependencies
+# For FAUST/JUCE audio file processing
+# Install with: pip install -r requirements-audio.txt
+
+# Core audio processing
+librosa>=0.10.1
+soundfile>=0.12.1
+scipy>=1.11.0
+
+# Audio I/O
+pyaudio>=0.2.13
+wave>=0.0.2
+
+# Music information retrieval
+mir-eval>=0.7
+pretty-midi>=0.2.10
+
+# Audio visualization
+matplotlib>=3.7.0
+seaborn>=0.13.0
+
+# DSP utilities
+resampy>=0.4.2
+audioread>=3.0.1
+
+# MIDI processing
+mido>=1.3.0
+python-rtmidi>=1.5.8
+
+# Optional: Advanced audio analysis
+# essentia>=2.1b6.dev1034  # Uncomment if needed
+# madmom>=0.16.1  # Uncomment for beat tracking

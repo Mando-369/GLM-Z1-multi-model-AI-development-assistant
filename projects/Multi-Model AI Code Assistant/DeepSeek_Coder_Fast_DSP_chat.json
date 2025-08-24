@@ -1,0 +1,20 @@
+[
+  {
+    "timestamp": "2025-08-12T15:49:47.455285",
+    "question": "can you read the open files??",
+    "answer": "❌ Error: Ollama call failed with status code 404. Maybe your model is not found and you should pull the model with `ollama pull deepseek-coder`.\n\nMake sure the model is installed with:\nollama pull deepseek-coder",
+    "model": "DeepSeek Coder (Fast DSP)"
+  },
+  {
+    "timestamp": "2025-08-12T15:50:22.295578",
+    "question": "can you read the open files??",
+    "answer": "❌ Error: Ollama call failed with status code 404. Maybe your model is not found and you should pull the model with `ollama pull deepseek-coder`.\n\nMake sure the model is installed with:\nollama pull deepseek-coder",
+    "model": "DeepSeek Coder (Fast DSP)"
+  },
+  {
+    "timestamp": "2025-08-12T16:01:58.383529",
+    "question": "can you read all the project files?",
+    "answer": "It seems like there is some confusion in the information provided as questions are repeated. However, I'll do my best to guide you through understanding how to access or read project files based on general programming knowledge. \n\nIf by \"can you read all the project files?\" you mean accessing and reading file contents within a specific project, then this process depends largely on your programming language of choice and the structure/content of those files. However, here's an example in Python using built-in `open()` function to read a text file:\n\n```python\nwith open(\"path_to_your_file\", \"r\") as file:\n    print(file.read())\n```\n\nThis code opens the file at the specified path and reads its contents, then prints them out. Make sure you replace `\"path_to_your_file\"` with your actual file's location. \n\nIf by \"can you read all the project files?\" you mean reading all kinds of different types of files (like CSV, JSON, XML, etc.) within a project directory, then it would depend on what those specific files are and how they're structured. In Python for example, you can use libraries like `pandas` to read CSV files:\n\n```python\nimport pandas as pd\ndf = pd.read_csv('path_to_your_file')\nprint(df)\n```\n\nOr the `json` module to read JSON:\n\n```python\nimport json\nwith open('path_to_your_file', 'r') as f:\n    data = json.load(f)\nprint(data)\n```\n\nAgain, replace `\"path_to_your_file\"` with the location of your file. And you'd have to handle specific cases for different types of files (like XML parsing libraries like `xml.etree.ElementTree` or `lxml` etc.) based on their structure and complexity.\n",
+    "model": "DeepSeek Coder (Fast DSP)"
+  }
+]

@@ -1,0 +1,169 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environments
+venv/
+ENV/
+env/
+.venv
+.ENV
+.env
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+*.sublime-project
+*.sublime-workspace
+
+# Jupyter Notebooks
+.ipynb_checkpoints
+*.ipynb
+
+# Model Files (Large)
+*.bin
+*.gguf
+*.safetensors
+*.pt
+*.pth
+*.onnx
+models/cached/
+models/downloads/
+
+# ChromaDB
+chroma_db/
+*.chroma
+*.sqlite3
+*.db
+
+# Project Data
+projects/*/cache/
+projects/*/temp/
+*.log
+logs/
+
+# Documentation (if auto-generated)
+docs/_build/
+docs/generated/
+
+# Audio Files
+*.wav
+*.mp3
+*.flac
+*.aiff
+*.au
+test_audio/
+
+# FAUST Generated
+*.cpp
+*.dsp.cpp
+faust-gen/
+
+# JUCE Builds
+Builds/
+JuceLibraryCode/
+
+# Streamlit
+.streamlit/secrets.toml
+.streamlit/cache/
+
+# Claude Code
+.claude/cache/
+.claude/temp/
+
+# Environment Variables
+.env
+.env.local
+.env.*.local
+
+# Test Coverage
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+cover/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+# Backup Files
+*.bak
+*.backup
+*.tmp
+*.temp
+*~
+
+# Config overrides (keep templates)
+config.local.yaml
+config.dev.yaml
+
+# API Keys and Secrets
+*.key
+*.pem
+secrets/
+credentials/
+
+# Large Documentation Downloads
+faust_documentation/downloads/
+juce_documentation/downloads/
+
+# User-specific project data
+projects/*/history/
+projects/*/exports/
+
+# Performance Profiling
+*.prof
+*.lprof
+profiling/
+
+# Model Training Artifacts
+checkpoints/
+runs/
+tensorboard/

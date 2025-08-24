@@ -1,0 +1,22 @@
+Source: https://docs.juce.com/master/group__juce__audio__formats.html
+================================================================================
+
+Classes for reading and writing various audio file formats.
+More...
+Topics
+codecs
+format
+sampler
+Detailed Description
+Classes for reading and writing various audio file formats.
+ID: juce_audio_formats
+vendor: juce
+version: 8.0.8
+name: JUCE audio file format codecs
+website:
+http://www.juce.com/juce
+license: AGPLv3/Commercial
+minimumCppStandard: 17
+dependencies: juce_audio_basics
+OSXFrameworks: CoreAudio CoreMIDI QuartzCore AudioToolbox
+iOSFrameworks: AudioToolbox QuartzCore

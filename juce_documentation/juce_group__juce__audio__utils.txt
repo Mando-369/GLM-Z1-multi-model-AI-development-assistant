@@ -1,0 +1,22 @@
+Source: https://docs.juce.com/master/group__juce__audio__utils.html
+================================================================================
+
+Classes for audio-related GUI and miscellaneous tasks.
+More...
+Topics
+audio_cd
+gui
+players
+Detailed Description
+Classes for audio-related GUI and miscellaneous tasks.
+ID: juce_audio_utils
+vendor: juce
+version: 8.0.8
+name: JUCE extra audio utility classes
+website:
+http://www.juce.com/juce
+license: AGPLv3/Commercial
+minimumCppStandard: 17
+dependencies: juce_audio_processors, juce_audio_formats, juce_audio_devices
+OSXFrameworks: CoreAudioKit DiscRecording
+iOSFrameworks: CoreAudioKit
