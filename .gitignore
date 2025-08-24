@@ -174,3 +174,14 @@ profiling/
 checkpoints/
 runs/
 tensorboard/
+
+# Additional Python artifacts
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Additional Streamlit
+.streamlit/config.toml
+
+# Ollama models (if stored locally)
+.ollama/
+ollama_models/
